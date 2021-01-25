@@ -10,56 +10,93 @@ export default class PromiseBee{
         this.value = null
         this.resolvedfns = []
         this.rejectedfns = []
-        try{
-            executor(this.resolve.bind(this), this.reject.bind(this))
-        } catch(err) {
-            this.reject(err)
+        const resolve = (value) => {
+            if(this.state !== pending) return 
+            this.state = fulfilled
+            this.value = value
+            while(this.resolvedfns.length){
+                let onResolved = this.resolvedfns.pop()
+                
+                return new PromiseBee((resolved, rejected) => {
+                    try{
+                        var result = onResolved(this.value)
+                    } catch (err){
+                        rejected(err)
+                    }
+                    if(result instanceof PromiseBee){
+                        result.then(resolved, rejected)
+                    } else {
+                        resolved(result)
+                    }
+                })   
+            }
         }
-        
+        const reject = (error) => {
+            if(this.state !== pending) return 
+            this.state = rejected
+            this.value = error
+            while(this.rejectedfns.length){
+                let onRejected = this.rejectedfns.pop()
+                return new PromiseBee((resolved, rejected) => {
+                    try{
+                        var result = onRejected(this.value)
+                    } catch (err){
+                        rejected(err)
+                    }
+                    if(result instanceof PromiseBee){
+                        result.then(resolved, rejected)
+                    } else {
+                        resolved(result)
+                    }
+                })               
+            }
+        }
+
+        try{
+            executor(resolve, reject)
+        } catch(err) {
+            reject(err)
+        }
     }
 
     then(onResolved = emptyFn, onRejected = emptyFn) {
         if(this.state === pending){
             this.resolvedfns.push(onResolved)
             this.rejectedfns.push(onRejected)
-        } else {
-            if(this.state === fulfilled){
-                onResolved(this.value)
-            }
-            if(this.state === rejected){
-                onRejected(this.value)
-            }
-        }
-
-    }
-
-    resolve(value) {
-        console.log(this)
-        if(this.state !== pending) return 
-        this.state = fulfilled
-        this.value = value
-        while(this.resolvedfns.length){
-            let fn = this.resolvedfns.pop()
-            fn(this.value)
-        }
-    }
-
-    reject(error) {
-        console.log(this)
-        if(this.state !== pending) return 
-        this.state = rejected
-        this.value = error
-        while(this.rejectedfns.length){
-            let fn = this.rejectedfns.pop()
-            fn(this.value)
+        } else if(this.state === fulfilled)  {
+            
+            return new PromiseBee((resolved, rejected) => {
+                try{
+                    var result = onResolved(this.value)
+                } catch (err){
+                    rejected(err)
+                }
+                if(result instanceof PromiseBee){
+                    result.then(resolved, rejected)
+                } else {
+                    resolved(result)
+                }
+            })
+        } else if(this.state === rejected){
+            return new PromiseBee((resolved, rejected) => {
+                try{
+                    var result = onRejected(this.value)
+                } catch (err){
+                    rejected(err)
+                }
+                if(result instanceof PromiseBee){
+                    result.then(resolved, rejected)
+                } else {
+                    resolved(result)
+                }
+            })
         }
     }
-
 
 }
 
 console.log('PromiseBee', PromiseBee)
-new PromiseBee((resolved, rejected) => {
+let p = new PromiseBee((resolved, rejected) => {
     setTimeout(() => {
         let number = Math.random()
         if(number > .5){
@@ -75,8 +112,10 @@ new PromiseBee((resolved, rejected) => {
     //     rejected(number)
     // }
 })
-.then(value => {
-    console.log('value ==>', value)
+let p2 = p.then(value => {
+    throw new Error('Error')
 }, err => {
     console.log('err ==>', err)
 })
+
+console.log('instance', p2)

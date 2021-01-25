@@ -3,6 +3,7 @@
 
 ## Usage
 
+```
 console.log('PromiseBee', PromiseBee)
 new PromiseBee((resolved, rejected) => {
     setTimeout(() => {
@@ -25,3 +26,4 @@ new PromiseBee((resolved, rejected) => {
 }, err => {
     console.log('err ==>', err)
 })
+```
