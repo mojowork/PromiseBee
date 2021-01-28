@@ -7,5 +7,48 @@
 </head>
 <body>
     <script src="dist/main.js"></script>
+    <script>
+        // let p1 = new PromiseBee((resolved, rejected) => {
+        //     resolved('同步测试 resolved')
+        //     // rejected('同步测试 rejected')
+        // })
+        // console.log('p1 ===> ', p1)
+        // let p2 = p1.then(value => {
+        //     console.log('then ==>', value)
+        // })
+        // console.log('p2 ===> ', p2)
+        // let p3 = p2.then(value => {
+        //     return new PromiseBee((resolved, rejected) => {
+        //         resolved('p3') 
+        //     })
+        // })
+        // p3.then(value => {
+        //     console.log('then ==>', value)
+        // })
+        // console.log('p3 ===> ', p3)
+
+        console.log('##################')
+
+        let ap1 = new PromiseBee((resolved, rejected) => {
+            setTimeout(() => {
+                resolved('异步测试 1')
+            }, 2000);
+        })
+        console.log('ap1 ===> ', ap1)
+        let ap2 = ap1.then(value => {
+            console.log('then ==>', value)
+            throw 'Errors'
+        })
+        console.log('ap2 ===> ', ap2)
+        let ap3 = ap2.then(value => {
+            return new PromiseBee((resolved, rejected) => {
+                setTimeout(() => {
+                    resolved('异步测试 then')
+            }, 2000);
+            })
+        })
+        ap3.then(value => console.log(value), reason => console.log('err', reason))
+        console.log('ap3 ===> ', ap3)
+    </script>
 </body>
 </html>
