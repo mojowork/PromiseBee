@@ -40,7 +40,6 @@ class PromiseBee{
     }
 
     then(onResolved, onRejected) {
-        debugger
         onResolved = typeof onResolved === 'function' ? onResolved : value => value
         onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason }
         return new PromiseBee((resoved, rejected) => {
@@ -81,6 +80,58 @@ class PromiseBee{
         })
     }
 
+    catch(onRejected) {
+        this.then(undefined, onRejected)
+    }
+
+    // changeStatus() {
+    //     this.then(() => {
+    //         return new PromiseBee(() => {})
+    //     })
+    // }
+
+    static reject(reason) {
+        return new PromiseBee((resolve, reject) => {
+            reject(reason)
+        })
+    }
+
+    static resolve(value) {
+        return new PromiseBee((resolve, reject) => {
+            if(value instanceof PromiseBee){
+                value.then(resolve, reject)
+            } else {
+                resolve(value)
+            }
+        })
+    }
+
+    static all(promises) {
+        let resolvedCount = 0
+        let results = []
+        let len = promises.length
+        return new PromiseBee((resolve, reject) => {
+            promises.forEach((promise, index) => {
+                PromiseBee.resolve(promise).then(value => {
+                    results[index] = value
+                    resolvedCount++
+                    if(resolvedCount === len){
+                        resolve(results)
+                    }
+                }, reject)
+            })
+        })
+    }
+
+    static race(promises) {
+        return new PromiseBee((resolve, reject) => {
+            promises.forEach(promise => {
+                PromiseBee.resolve(promise).then(resolve, reject)
+            })
+        })
+    }
+
+    
 }
 
 
