@@ -6,9 +6,9 @@
     <title>Document</title>
 </head>
 <body>
-    <script src="dist/main.js"></script>
+    <script src="src/promiseaplus.js"></script>
     <script>
-        // let p1 = new PromiseBee((resolved, rejected) => {
+        // let p1 = new Promise((resolved, rejected) => {
         //     resolved('同步测试 resolved')
         //     // rejected('同步测试 rejected')
         // })
@@ -18,7 +18,7 @@
         // })
         // console.log('p2 ===> ', p2)
         // let p3 = p2.then(value => {
-        //     return new PromiseBee((resolved, rejected) => {
+        //     return new Promise((resolved, rejected) => {
         //         resolved('p3') 
         //     })
         // })
@@ -27,28 +27,43 @@
         // })
         // console.log('p3 ===> ', p3)
 
-        console.log('##################')
+        // console.log('#######Promise###########', Promise)
 
-        let ap1 = new PromiseBee((resolved, rejected) => {
+        let ap1 = new Promise((resolved, rejected) => {
             setTimeout(() => {
                 resolved('异步测试 1')
             }, 2000);
         })
-        console.log('ap1 ===> ', ap1)
-        let ap2 = ap1.then(value => {
-            console.log('then ==>', value)
-            throw 'Errors'
-        })
-        console.log('ap2 ===> ', ap2)
-        let ap3 = ap2.then(value => {
-            return new PromiseBee((resolved, rejected) => {
-                setTimeout(() => {
-                    resolved('异步测试 then')
-            }, 2000);
+        let ap2 = ap1.then( function(value) {
+            console.log('then this', this)
+            return new Promise((resolved, rejected) => {
+                resolved(111)
             })
         })
-        ap3.then(value => console.log(value), reason => console.log('err', reason))
-        console.log('ap3 ===> ', ap3)
+        console.log('ap2', ap2)
+        let ap3 = ap2.then(res => {
+            console.log('res', res)
+            return '111111'
+        })
+        ap3.then(res => {
+            console.log('res', res)
+            return '111111'
+        })
+        // console.log('ap1 ===> ', ap1)
+        // let ap2 = ap1.then(value => {
+        //     console.log('then ==>', value)
+        //     throw 'Errors'
+        // })
+        // console.log('ap2 ===> ', ap2)
+        // let ap3 = ap2.then(value => {
+        //     return new Promise((resolved, rejected) => {
+        //         setTimeout(() => {
+        //             resolved('异步测试 then')
+        //     }, 2000);
+        //     })
+        // })
+        // ap3.then(value => console.log(value), reason => console.log('err', reason))
+        // console.log('ap3 ===> ', ap3)
     </script>
 </body>
 </html>
