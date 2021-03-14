@@ -1,15 +1,15 @@
-const PADDING = 'padding'
+const PENDING = 'pending'
 const FULFILLED = 'fulfilled'
 const REJECTED = 'rejected'
 
 class PromiseBee{
     constructor(executor) {
-        this.PromiseState = PADDING
+        this.PromiseState = PENDING
         this.PromiseResult = null
         this.PromiseFns = []
         const resolve = value => {
             // console.log('resolve', this)
-            if(this.PromiseState !== PADDING) return
+            if(this.PromiseState !== PENDING) return
             this.PromiseState = FULFILLED
             this.PromiseResult = value
             for (const obj of this.PromiseFns) {
@@ -21,7 +21,7 @@ class PromiseBee{
         }
         const reject = resoon => {
             // console.log('reject', this)
-            if(this.PromiseState !== PADDING) return
+            if(this.PromiseState !== PENDING) return
             this.PromiseState = REJECTED
             this.PromiseResult = resoon
             for (const obj of this.PromiseFns) {
@@ -57,7 +57,7 @@ class PromiseBee{
                 }
             }
 
-            if(this.PromiseState === PADDING){
+            if(this.PromiseState === PENDING){
                 this.PromiseFns.push({
                     onResolved: () => {
                         walk(onResolved)
